@@ -1,27 +1,78 @@
 class Group {
     constructor(group = []) {
-        this.group = group;
+        this.members = group;
     }
 
     add(val) {
-        if (!this.group.includes(val)) this.group.push(val);
+        if (!this.has(val)) this.members.push(val);
     }
 
     delete(val) {
-        if (this.group.includes(val)) {
-            let i = this.group.indexOf(val);
-            this.group.splice(i, 1);
+        if (this.has(val)) {
+            let i = this.members.indexOf(val);
+            this.members.splice(i, 1);
         };
     }
 
     has(val) {
-        return this.group.includes(val);
+        return this.members.includes(val);
     }
 
-    static from(group) {
-        return new Group(group);
+    static from(collection) {
+        return new Group(collection);
+    }
+
+    [Symbol.iterator]() {
+        return new GroupIterator(this);
     }
 }
+
+class GroupIterator {
+    constructor(group) {
+        this.group = group;
+        this.position = 0;
+    }
+
+    next() {
+        if (this.position >= this.group.members.length) {
+            return { done: true };
+        }
+        let result = { value: this.group.members[this.position], done: false };
+        this.position++;
+
+        return result;
+    }
+}
+
+
+
+let group = Group.from([10, 20]);
+console.log(group.has(10));
+// → true
+console.log(group.has(30));
+// → false
+group.add(10);
+console.log(group);
+group.delete(10);
+console.log(group.has(10));
+console.log(group);
+
+
+
+for (let value of Group.from(["a", "b", "c"])) {
+    console.log(value);
+}
+// → a
+// → b
+// → c
+
+
+
+
+
+
+
+
 
 // class Group {
 //     constructor() {
@@ -37,7 +88,6 @@ class Group {
 //     delete(value) {
 //         this.members = this.members.filter(v => v !== value);
 //     }
-
 //     has(value) {
 //         return this.members.includes(value);
 //     }
@@ -50,31 +100,3 @@ class Group {
 //         return group;
 //     }
 // }
-
-let group = Group.from([10, 20]);
-console.log(group.has(10));
-// → true
-console.log(group.has(30));
-// → false
-group.add(10);
-console.log(group);
-group.delete(10);
-console.log(group.has(10));
-console.log(group);
-
-class GroupIterator() {
-    constructor(group) {
-        this.group = group;
-    }
-
-    next() {
-    }
-}
-
-
-for (let value of Group.from(["a", "b", "c"])) {
-    console.log(value);
-}
-// → a
-// → b
-// → c

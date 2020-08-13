@@ -148,8 +148,10 @@ function findRoute(graph, from, to) {
 
     for (let i = 0; i < work.length; i++) {
         let { at, route } = work[i];
+        // console.log('Work: ', work);
         for (let place of graph[at]) {
             if (place == to) return route.concat(place);
+            // if we havent come from that place (check if place is not in work already)
             if (!work.some(w => w.at == place)) {
                 work.push({ at: place, route: route.concat(place) });
             }
@@ -161,6 +163,9 @@ function findRoute(graph, from, to) {
 function goalOrientedRobot({ place, parcels }, route) {
     if (route.length == 0) {
         let parcel = parcels[0];
+
+        // console.log('parcels', parcels);
+        // console.log('place:', place, 'parcel.place', parcel.place);
         if (parcel.place != place) {
             // if the parcel hasnt been picked up yet, find route to pickup place
             route = findRoute(roadGraph, place, parcel.place);
@@ -169,12 +174,37 @@ function goalOrientedRobot({ place, parcels }, route) {
             route = findRoute(roadGraph, place, parcel.address);
         }
     }
+    // console.log('Route: ', route);
     return { direction: route[0], memory: route.slice(1) };
 }
 
 // Exercise #2
 //! Faster robot
-function fasterRobot(state, memory) {
+function lazyRobot({ place, parcels }, route) {
+    // Describe a route for every parcel
+    if (route.length == 0) {
+        let routes = parcels.map(parcel => {
+            if (parcel.place != place) {
+                return { route: findRoute(roadGraph, place, parcel.place), pickUp: true };
+            } else {
+                return { route: findRoute(roadGraph, place, parcel.address), pickUp: false };
+            }
+        });
+
+        // This determines the precedence a route gets when choosing.
+        // Route length counts negatively, routes that pick up a package
+        // get a small bonus
+        function score({ route, pickUp }) {
+            return (pickUp ? 0.5 : 0) - route.length;
+        }
+        // get shortest route (has biggest score)
+        route = routes.reduce((a, b) => score(a) > score(b) ? a : b).route;
+        console.log('routes:', routes);
+
+    }
+    console.log('parcels:', parcels);
+    console.log('route: ', route);
+    return { direction: route[0], memory: route.slice(1) };
 
 }
 
@@ -234,4 +264,4 @@ function compareRobots(robotA, robotB, robotC) {
         console.log(`${robotC.name} averages ${turnsC / rounds} turns.`);
     }
 }
-compareRobots(randomRobot, routeRobot, goalOrientedRobot);
+// compareRobots(randomRobot, routeRobot, goalOrientedRobot);
