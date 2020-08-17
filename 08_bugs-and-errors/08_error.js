@@ -12,6 +12,7 @@ function getAccount() {
   return accountName;
 }
 
+// Bad code, if getAccount() throws Error, that line of code wont be executed but the money still will be taken away from the sender
 function transfer(from, amount) {
   if (accounts[from] < amount) return;
   accounts[from] -= amount;
@@ -33,7 +34,7 @@ function transfer(from, amount) {
   }
 }
 
-var InputError = class InputError extends Error {}
+var InputError = class InputError extends Error { }
 
 function promptDirection(question) {
   let result = prompt(question);
